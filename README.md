@@ -22,13 +22,13 @@ demo:
 
 参数:  
 ```
-sort,支持按以下字段递增排序：  
+sort,支持按以下参数递增排序：  
     code, name, city, totalValue, tradeValue,price, bossName, bossBirth
 
 market, 深圳或上海：  
     sz,  深圳
     sh,  上海
 
-city, 城市  
-    如：深圳、北京、上海、广东等
+city, 城市： 
+    如：深圳、北京、广东、江西等
 ```
