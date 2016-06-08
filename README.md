@@ -17,9 +17,8 @@
 ```
 
 demo:  
-```
-    http://ifels.cn:10000/stocks?sort=Price&market=sz&city=深圳
-```
+> http://ifels.cn:10000/stocks?sort=Price&market=sz&city=深圳
+
 
 参数:  
 ```
