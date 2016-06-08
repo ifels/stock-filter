@@ -22,6 +22,8 @@ type Stock struct {
 	Price      float32 `json:"price"`      //当前股价
 	BossName   string  `json:"bossName"`
 	BossBirth  string  `json:"bossBirth"`
+	Subjects   string  `json:"subjects"`
+	SubjectTip string  `json:"subjectTip"`
 	//BossInfo  string `json:"bossInfo"`
 	TimeStamp string `json:"timeStamp"`
 }
@@ -111,6 +113,7 @@ func (stock *Stock) fillCompanyInfo() error {
 		return false
 	})
 
+	stock.BossBirth = "unknow"
 	doc.Find(".mng-intro").EachWithBreak(func(i int, s *goquery.Selection) bool {
 		info := s.Find("p").Text()
 		log.Println(info)
@@ -135,9 +138,27 @@ func (stock *Stock) fillCompanyInfo() error {
 		}
 		return false
 	})
-	if len(stock.BossBirth) == 0 {
-		stock.BossBirth = "unknow"
-	}
+
+	doc.Find("a").EachWithBreak(func(i int, s *goquery.Selection) bool {
+		tarName := s.AttrOr("tar_name", "")
+		if strings.EqualFold(tarName, "概念题材") {
+			subjects := ""
+			s.Find("td").Each(func(i int, ss *goquery.Selection) {
+				_, isTip := ss.Attr("colspan")
+				if isTip {
+					stock.SubjectTip = ss.Text()
+				} else {
+					if len(subjects) > 0 {
+						subjects = subjects + ", "
+					}
+					subjects = subjects + ss.Text()
+				}
+			})
+			stock.Subjects = subjects
+			return false
+		}
+		return true
+	})
 
 	doc.Find("tr").EachWithBreak(func(i int, s *goquery.Selection) bool {
 		th := s.Find("th")
@@ -148,6 +169,7 @@ func (stock *Stock) fillCompanyInfo() error {
 		}
 		return true
 	})
+
 	stock.TimeStamp = time.Now().Format("2006-01-02 15:04:05")
 	return err
 }

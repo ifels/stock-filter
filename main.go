@@ -51,6 +51,7 @@ func handleStocksRequest(w http.ResponseWriter, req *http.Request) {
 	sort := req.Form.Get("sort")
 	city := req.Form.Get("city")
 	market := req.Form.Get("market")
+	subjects := req.Form.Get("subjects")
 	if len(sort) > 0 {
 		sort = strings.ToLower(sort)
 	} else {
@@ -72,6 +73,11 @@ func handleStocksRequest(w http.ResponseWriter, req *http.Request) {
 			if len(city) != 0 && !strings.Contains(stock.City, city) {
 				continue
 			}
+
+			if len(subjects) != 0 && !strings.Contains(stock.Subjects, subjects) {
+				continue
+			}
+
 			if len(market) != 0 {
 				if (strings.EqualFold(market, "sz") && strings.HasPrefix(stock.Code, "6")) || (strings.EqualFold(market, "sh") && !strings.HasPrefix(stock.Code, "6")) {
 					continue
