@@ -27,7 +27,7 @@ type Stock struct {
 }
 
 var (
-	reAge1 = regexp.MustCompile(`.*([0-9]{4})年[^,]*生,.*`)
+	reAge1 = regexp.MustCompile(`.*([0-9]{4})年[月日出\d]*生,.*`)
 	reAge2 = regexp.MustCompile(`.*[^先]生于([0-9]{4})年.*`)
 	reAge3 = regexp.MustCompile(`.*,([0-9]{2})岁,.*`)
 )
