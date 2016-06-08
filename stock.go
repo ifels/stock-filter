@@ -133,9 +133,11 @@ func (stock *Stock) fillCompanyInfo() error {
 				return false
 			}
 		}
-		stock.BossBirth = "unknow"
 		return false
 	})
+	if len(stock.BossBirth) == 0 {
+		stock.BossBirth = "unknow"
+	}
 
 	doc.Find("tr").EachWithBreak(func(i int, s *goquery.Selection) bool {
 		th := s.Find("th")
