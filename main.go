@@ -105,7 +105,7 @@ func getStocks() {
 	}
 }
 
-func parseStocks(content string) {
+func parseStocks(content string) error {
 	log.Println("parse stocks....")
 	r := regexp.MustCompile(`"([^"]*)"`)
 	arr := r.FindAllString(content, -1)
@@ -124,22 +124,40 @@ func parseStocks(content string) {
 		}
 	}
 
+	session, err := mgo.Dial("")
+	if err != nil {
+		log.Println("mgo.Dial error ", err.Error())
+		return err
+	}
+	defer session.Close()
+	session.SetMode(mgo.Monotonic, true)
+
 	for _, stock := range stockList {
+		c := session.DB("stock").C("items")
+		query := bson.M{"code": stock.Code}
+		savedStock := Stock{}
+		c.Find(query).One(&savedStock)
+		if len(savedStock.TimeStamp) > 0 {
+			ts, err := time.ParseInLocation("2006-01-02 15:04:05", savedStock.TimeStamp, time.Local)
+			if err == nil {
+				duration := time.Now().Sub(ts)
+				log.Printf("duration = %v", duration)
+				if duration.Hours() < 2 {
+					//聚上次抓取时间小于两小时,则不抓取数据
+					continue
+				}
+			} else {
+				log.Println("parse ts error : ", err)
+			}
+		}
 		err := stock.FillStockInfo()
 		log.Printf("%+v\n", stock)
 		if err != nil {
 			log.Println("err %v", err)
 		} else {
-			session, err := mgo.Dial("")
-			if err != nil {
-				log.Println("mgo.Dial error ", err.Error())
-				return
-			}
-			defer session.Close()
-			session.SetMode(mgo.Monotonic, true)
-			c := session.DB("stock").C("items")
 			c.Upsert(bson.M{"code": stock.Code}, &stock)
 		}
 		time.Sleep(time.Duration(8) * time.Second)
 	}
+	return nil
 }

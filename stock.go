@@ -23,6 +23,7 @@ type Stock struct {
 	BossName   string  `json:"bossName"`
 	BossBirth  string  `json:"bossBirth"`
 	//BossInfo  string `json:"bossInfo"`
+	TimeStamp string `json:"timeStamp"`
 }
 
 var (
@@ -145,5 +146,6 @@ func (stock *Stock) fillCompanyInfo() error {
 		}
 		return true
 	})
+	stock.TimeStamp = time.Now().Format("2006-01-02 15:04:05")
 	return err
 }
