@@ -30,7 +30,7 @@ sort,支持按以下参数递增排序：
     tradeValue, 流通市值
     city,       公司所在城市
     bossName,   董事长名字
-    bossBirth   董事长年纪
+    bossBirth   董事长年龄
 
 market, 深圳或上海：  
     sz,  深圳
