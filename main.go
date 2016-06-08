@@ -101,7 +101,7 @@ func getStocks() {
 			}
 			parseStocks(string(content))
 		}
-		time.Sleep(time.Duration(6) * time.Hour)
+		time.Sleep(time.Duration(3) * time.Hour)
 	}
 }
 
@@ -140,6 +140,6 @@ func parseStocks(content string) {
 			c := session.DB("stock").C("items")
 			c.Upsert(bson.M{"code": stock.Code}, &stock)
 		}
-		time.Sleep(time.Duration(10) * time.Second)
+		time.Sleep(time.Duration(8) * time.Second)
 	}
 }
