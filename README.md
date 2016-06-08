@@ -13,7 +13,7 @@
 ```
     1. cd stock-filter
     2. go build
-    3. ./star.sh
+    3. ./start.sh
 ```
 
 demo:  
@@ -24,12 +24,12 @@ demo:
 ```
 sort,支持按以下参数递增排序：  
     code,       股票代码
-    name,       股票名字
+    name,       股票名称
     price,      股票当前价格
     totalValue, 总市值
     tradeValue, 流通市值
     city,       公司所在城市
-    bossName,   董事长名字
+    bossName,   董事长名称
     bossBirth   董事长年龄
 
 market, 深圳或上海：  
