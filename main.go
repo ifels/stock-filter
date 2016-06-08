@@ -133,6 +133,8 @@ func parseStocks(content string) error {
 	session.SetMode(mgo.Monotonic, true)
 
 	for _, stock := range stockList {
+		start := time.Now()
+
 		c := session.DB("stock").C("items")
 		query := bson.M{"code": stock.Code}
 		savedStock := Stock{}
@@ -142,8 +144,8 @@ func parseStocks(content string) error {
 			if err == nil {
 				duration := time.Now().Sub(ts)
 				log.Printf("duration = %v", duration)
-				if duration.Hours() < 2 {
-					//聚上次抓取时间小于两小时,则不抓取数据
+				if duration.Minutes() < 30 {
+					//距上次抓取时间小于30分钟,则不抓取数据
 					continue
 				}
 			} else {
@@ -157,7 +159,11 @@ func parseStocks(content string) error {
 		} else {
 			c.Upsert(bson.M{"code": stock.Code}, &stock)
 		}
-		time.Sleep(time.Duration(8) * time.Second)
+		duration := time.Now().Sub(start)
+		log.Println("duration = ", duration)
+
+		time.Sleep(time.Duration(500) * time.Millisecond)
 	}
+	log.Println("..................................")
 	return nil
 }
