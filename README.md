@@ -23,7 +23,14 @@ demo:
 参数:  
 ```
 sort,支持按以下参数递增排序：  
-    code, name, city, totalValue, tradeValue,price, bossName, bossBirth
+    code,       股票代码
+    name,       股票名字
+    price,      股票当前价格
+    totalValue, 总市值
+    tradeValue, 流通市值
+    city,       公司所在城市
+    bossName,   董事长名字
+    bossBirth   董事长年纪
 
 market, 深圳或上海：  
     sz,  深圳
