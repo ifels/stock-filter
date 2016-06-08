@@ -17,9 +17,12 @@
 ```
 
 demo:  
+```
     http://ifels.cn:10000/stocks?sort=Price&market=sz&city=深圳
+```
 
 参数:  
+```
 sort,支持按以下字段递增排序：  
     code, name, city, totalValue, tradeValue,price, bossName, bossBirth
 
@@ -29,3 +32,4 @@ market, 深圳或上海：
 
 city, 城市  
     如：深圳、北京、上海、广东等
+```
