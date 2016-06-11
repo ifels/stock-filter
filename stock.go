@@ -25,7 +25,8 @@ type Stock struct {
 	Subjects   string  `json:"subjects"`
 	SubjectTip string  `json:"subjectTip"`
 	//BossInfo  string `json:"bossInfo"`
-	TimeStamp string `json:"timeStamp"`
+	LaunchDate string `json:"launchDate"`
+	TimeStamp  string `json:"timeStamp"`
 }
 
 var (
@@ -171,5 +172,40 @@ func (stock *Stock) fillCompanyInfo() error {
 	})
 
 	stock.TimeStamp = time.Now().Format("2006-01-02 15:04:05")
+	return stock.fillCompanyInfo2()
+}
+
+func (stock *Stock) fillCompanyInfo2() error {
+	charset := "gbk"
+	//stockCode = "300340"
+	url := fmt.Sprintf("http://basic.10jqka.com.cn/mobile/%s/company.html", stock.Code)
+	log.Println(url)
+	rsp, err := http.Get(url)
+	if err != nil {
+		return err
+	}
+	defer rsp.Body.Close()
+
+	if mahonia.GetCharset(charset) == nil {
+		return fmt.Errorf("%s charset not suported \n", charset)
+	}
+
+	dec := mahonia.NewDecoder(charset)
+	rd := dec.NewReader(rsp.Body)
+
+	doc, err := goquery.NewDocumentFromReader(rd)
+	if err != nil {
+		return fmt.Errorf("when create from reader error %s ", err.Error())
+	}
+
+	doc.Find("tr").EachWithBreak(func(i int, s *goquery.Selection) bool {
+		w01 := s.Find(".w01")
+		tl := s.Find(".tl")
+		if strings.EqualFold("上市日期", w01.Text()) {
+			stock.LaunchDate = tl.Text()
+			return false
+		}
+		return true
+	})
 	return err
 }
