@@ -75,6 +75,7 @@ func (stock *Stock) FillStockInfo() error {
 		stock.TradeValue = getFloat32(arr[44])
 		stock.TotalValue = getFloat32(arr[45])
 	}
+	stock.fillXueqiuHot()
 	return stock.fillCompanyInfo()
 }
 
@@ -206,6 +207,38 @@ func (stock *Stock) fillCompanyInfo2() error {
 			return false
 		}
 		return true
+	})
+	return err
+}
+
+func (stock *Stock) fillXueqiuHot() error {
+	charset := "gbk"
+	url := ""
+	if strings.HasPrefix(stock.Code, "6") {
+		url = fmt.Sprintf("https://xueqiu.com/S/SH%s/follows", stock.Code)
+	} else {
+		url = fmt.Sprintf("https://xueqiu.com/S/SZ%s/follows", stock.Code)
+	}
+	client := &http.Client{Jar: xueqiuJar}
+	req, _ := http.NewRequest("GET", url, nil)
+	rsp, err := client.Do(req)
+	defer rsp.Body.Close()
+
+	if mahonia.GetCharset(charset) == nil {
+		return fmt.Errorf("%s charset not suported \n", charset)
+	}
+
+	dec := mahonia.NewDecoder(charset)
+	rd := dec.NewReader(rsp.Body)
+
+	doc, err := goquery.NewDocumentFromReader(rd)
+	if err != nil {
+		return fmt.Errorf("when create from reader error %s ", err.Error())
+	}
+	doc.Find(".stockInfo span").EachWithBreak(func(i int, s *goquery.Selection) bool {
+		// For each item found, get the band and title
+		fmt.Println("hot.txt", s.Text)
+		return false
 	})
 	return err
 }

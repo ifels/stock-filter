@@ -18,9 +18,10 @@ import (
 )
 
 var (
-	r      = render.New(render.Options{})
-	jar, _ = cookiejar.New(nil)
-	url    = "http://hqdigi2.eastmoney.com/EM_Quote2010NumericApplication/index.aspx?type=s&sortType=C&sortRule=-1&pageSize=5000&page=1&jsName=quote_123&style=33&token=44c9d251add88e27b65ed86506f6e5da&_g=0.31431945857925436"
+	r            = render.New(render.Options{})
+	jar, _       = cookiejar.New(nil)
+	xueqiuJar, _ = cookiejar.New(nil)
+	url          = "http://hqdigi2.eastmoney.com/EM_Quote2010NumericApplication/index.aspx?type=s&sortType=C&sortRule=-1&pageSize=5000&page=1&jsName=quote_123&style=33&token=44c9d251add88e27b65ed86506f6e5da&_g=0.31431945857925436"
 )
 
 func main() {
@@ -92,6 +93,7 @@ func handleStocksRequest(w http.ResponseWriter, req *http.Request) {
 
 func getStocks() {
 	for {
+		initXueqiuCookie()
 		log.Println("url = ", url)
 		client := &http.Client{Jar: jar}
 		req, _ := http.NewRequest("GET", url, nil)
@@ -172,4 +174,10 @@ func parseStocks(content string) error {
 	}
 	log.Println("..................................")
 	return nil
+}
+
+func initXueqiuCookie() {
+	client := &http.Client{Jar: xueqiuJar}
+	req, _ := http.NewRequest("GET", "http://xueqiu.com", nil)
+	client.Do(req)
 }
