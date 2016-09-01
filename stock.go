@@ -27,6 +27,7 @@ type Stock struct {
 	//BossInfo  string `json:"bossInfo"`
 	LaunchDate string `json:"launchDate"`
 	TimeStamp  string `json:"timeStamp"`
+	XueqiuHot  int64  `json:"xueqiuHot"`
 }
 
 var (
@@ -75,8 +76,9 @@ func (stock *Stock) FillStockInfo() error {
 		stock.TradeValue = getFloat32(arr[44])
 		stock.TotalValue = getFloat32(arr[45])
 	}
+	err = stock.fillCompanyInfo()
 	stock.fillXueqiuHot()
-	return stock.fillCompanyInfo()
+	return err
 }
 
 func getFloat32(value string) float32 {
@@ -212,16 +214,22 @@ func (stock *Stock) fillCompanyInfo2() error {
 }
 
 func (stock *Stock) fillXueqiuHot() error {
-	charset := "gbk"
+	charset := "utf8"
 	url := ""
 	if strings.HasPrefix(stock.Code, "6") {
-		url = fmt.Sprintf("https://xueqiu.com/S/SH%s/follows", stock.Code)
+		url = fmt.Sprintf("https://xueqiu.com/S/SH%s", stock.Code)
 	} else {
-		url = fmt.Sprintf("https://xueqiu.com/S/SZ%s/follows", stock.Code)
+		url = fmt.Sprintf("https://xueqiu.com/S/SZ%s", stock.Code)
 	}
 	client := &http.Client{Jar: xueqiuJar}
-	req, _ := http.NewRequest("GET", url, nil)
+	req, _ := http.NewRequest("GET", url+"/follows", nil)
+	req.Header.Set("Referer", url)
 	rsp, err := client.Do(req)
+	if err != nil {
+		fmt.Println("err: ", err.Error())
+		return err
+	}
+	fmt.Println("rsp: ", rsp)
 	defer rsp.Body.Close()
 
 	if mahonia.GetCharset(charset) == nil {
@@ -237,7 +245,16 @@ func (stock *Stock) fillXueqiuHot() error {
 	}
 	doc.Find(".stockInfo span").EachWithBreak(func(i int, s *goquery.Selection) bool {
 		// For each item found, get the band and title
-		fmt.Println("hot.txt", s.Text)
+		fmt.Println("hot.txt", s.Text())
+		reg := regexp.MustCompile(`.*的粉丝\((\d+)\)人.*`)
+		if reg.MatchString(s.Text()) {
+			hot := reg.ReplaceAllString(s.Text(), "$1")
+			fmt.Println("hot = ", hot)
+			value, err := strconv.ParseInt(hot, 10, 64)
+			if err == nil {
+				stock.XueqiuHot = value
+			}
+		}
 		return false
 	})
 	return err
