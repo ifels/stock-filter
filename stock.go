@@ -14,24 +14,24 @@ import (
 )
 
 type Stock struct {
-	Code       string  `json:"code"`
-	Name       string  `json:"name"`
-	City       string  `json:"city"`
-	Address    string  `json:"address"`
-	TotalValue float32 `json:"totalValue"` //总市值
-	TradeValue float32 `json:"tradeValue"` //流通市值
-	Price      float32 `json:"price"`      //当前股价
-	BossName   string  `json:"bossName"`
-	BossBirth  string  `json:"bossBirth"`
-	Subjects   string  `json:"subjects"`
-	SubjectTip string  `json:"subjectTip"`
-	//BossInfo  string `json:"bossInfo"`
-	Shareholders string  `json:"shareholders"`
-	LaunchDate   string  `json:"launchDate"`
-	TimeStamp    string  `json:"timeStamp"`
-	XueqiuHot    int64   `json:"xueqiuHot"`
+	Code         string  `json:"code"`
+	Name         string  `json:"name"`
+	City         string  `json:"city"`
+	Address      string  `json:"address"`
+	TotalValue   float32 `json:"totalValue"` //总市值
+	TradeValue   float32 `json:"tradeValue"` //流通市值
+	Price        float32 `json:"price"`      //当前股价
 	PE           float32 `json:"PE"`
 	TurnoverRate float32 `json:"turnoverRate"`
+	BossName     string  `json:"bossName"`
+	BossBirth    string  `json:"bossBirth"`
+	Subjects     string  `json:"subjects"`
+	SubjectTip   string  `json:"subjectTip"`
+	//BossInfo  string `json:"bossInfo"`
+	Shareholders string `json:"shareholders"`
+	LaunchDate   string `json:"launchDate"`
+	XueqiuHot    int64  `json:"xueqiuHot"`
+	TimeStamp    string `json:"timeStamp"`
 }
 
 var (
