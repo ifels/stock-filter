@@ -26,9 +26,11 @@ type Stock struct {
 	Subjects   string  `json:"subjects"`
 	SubjectTip string  `json:"subjectTip"`
 	//BossInfo  string `json:"bossInfo"`
-	LaunchDate string `json:"launchDate"`
-	TimeStamp  string `json:"timeStamp"`
-	XueqiuHot  int64  `json:"xueqiuHot"`
+	LaunchDate   string  `json:"launchDate"`
+	TimeStamp    string  `json:"timeStamp"`
+	XueqiuHot    int64   `json:"xueqiuHot"`
+	PE           float32 `json:"PE"`
+	TurnoverRate float32 `json:"turnoverRate"`
 }
 
 var (
@@ -74,6 +76,12 @@ func (stock *Stock) FillStockInfo() error {
 		if stock.Price == 0 {
 			stock.Price = getFloat32(arr[4])
 		}
+		stock.TurnoverRate = getFloat32(arr[38])
+		pe := getFloat32(arr[39])
+		if pe == 0 {
+			pe = 1000000
+		}
+		stock.PE = pe
 		stock.TradeValue = getFloat32(arr[44])
 		stock.TotalValue = getFloat32(arr[45])
 	}
