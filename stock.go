@@ -26,9 +26,10 @@ type Stock struct {
 	Subjects   string  `json:"subjects"`
 	SubjectTip string  `json:"subjectTip"`
 	//BossInfo  string `json:"bossInfo"`
-	LaunchDate string `json:"launchDate"`
-	TimeStamp  string `json:"timeStamp"`
-	XueqiuHot  int64  `json:"xueqiuHot"`
+	LaunchDate   string `json:"launchDate"`
+	TimeStamp    string `json:"timeStamp"`
+	XueqiuHot    int64  `json:"xueqiuHot"`
+	Shareholders string `json:"shareholders"`
 }
 
 var (
@@ -175,6 +176,16 @@ func (stock *Stock) fillCompanyInfo() error {
 		return true
 	})
 
+	doc.Find("li").EachWithBreak(func(i int, s *goquery.Selection) bool {
+		span := s.Find("span")
+		ins := s.Find("ins")
+		if strings.EqualFold("股东人数", span.Text()) {
+			stock.Shareholders = ins.Text()
+			return false
+		}
+		return true
+	})
+
 	stock.TimeStamp = time.Now().Format("2006-01-02 15:04:05")
 	return stock.fillCompanyInfo2()
 }
@@ -211,6 +222,7 @@ func (stock *Stock) fillCompanyInfo2() error {
 		}
 		return true
 	})
+
 	return stock.fillCompanyInfo3()
 }
 func (stock *Stock) fillCompanyInfo3() error {
