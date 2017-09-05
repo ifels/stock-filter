@@ -14,25 +14,24 @@ import (
 )
 
 type Stock struct {
-	Code         string  `json:"code"`
-	Name         string  `json:"name"`
-	City         string  `json:"city"`
-	Address      string  `json:"address"`
-	TotalValue   float32 `json:"totalValue"` //总市值
-	TradeValue   float32 `json:"tradeValue"` //流通市值
-	Price        float32 `json:"price"`      //当前股价
-	PE           float32 `json:"PE"`
-	TurnoverRate float32 `json:"turnoverRate"`
-	BossName     string  `json:"bossName"`
-	BossBirth    string  `json:"bossBirth"`
-	Subjects     string  `json:"subjects"`
-	SubjectTip   string  `json:"subjectTip"`
-	//BossInfo  string `json:"bossInfo"`
+	Code         string   `json:"code"`
+	Name         string   `json:"name"`
+	City         string   `json:"city"`
+	Address      string   `json:"address"`
+	TotalValue   float32  `json:"totalValue"` //总市值
+	TradeValue   float32  `json:"tradeValue"` //流通市值
+	Price        float32  `json:"price"`      //当前股价
+	PE           float32  `json:"PE"`
+	TurnoverRate float32  `json:"turnoverRate"`
+	BossName     string   `json:"bossName"`
+	BossBirth    string   `json:"bossBirth"`
+	Subjects     string   `json:"subjects"`
+	SubjectTip   string   `json:"subjectTip"`
 	Shareholders string   `json:"shareholders"`
 	LaunchDate   string   `json:"launchDate"`
 	XueqiuHot    int64    `json:"xueqiuHot"`
 	TimeStamp    string   `json:"timeStamp"`
-	Hodlers      []Holder `json:"hodlers"`
+	Holders      []Holder `json:"holders"`
 }
 
 var (
@@ -103,7 +102,6 @@ func getFloat32(value string) float32 {
 
 func (stock *Stock) fillCompanyInfo() error {
 	charset := "gbk"
-	//stockCode = "300340"
 	url := fmt.Sprintf("http://basic.10jqka.com.cn/mobile/%s/companyn.html", stock.Code)
 	log.Println(url)
 	rsp, err := http.Get(url)
@@ -201,7 +199,6 @@ func (stock *Stock) fillCompanyInfo() error {
 
 func (stock *Stock) fillCompanyInfo2() error {
 	charset := "gbk"
-	//stockCode = "300340"
 	url := fmt.Sprintf("http://basic.10jqka.com.cn/mobile/%s/company.html", stock.Code)
 	log.Println(url)
 	rsp, err := http.Get(url)
@@ -237,7 +234,6 @@ func (stock *Stock) fillCompanyInfo2() error {
 
 func (stock *Stock) fillCompanyInfo3() error {
 	charset := "gbk"
-	//stockCode = "300340"
 
 	url := fmt.Sprintf("http://basic.10jqka.com.cn/mobile/%s/profilen.html", stock.Code)
 	log.Println(url)
@@ -273,7 +269,6 @@ func (stock *Stock) fillCompanyInfo3() error {
 
 func (stock *Stock) fillHolders() error {
 	charset := "gbk"
-	//stockCode = "300340"
 	url := fmt.Sprintf("http://basic.10jqka.com.cn/mobile/%s/holdern.html", stock.Code)
 	log.Println(url)
 	rsp, err := http.Get(url)
@@ -324,11 +319,13 @@ func (stock *Stock) fillHolders() error {
 						return true
 					})
 					log.Println("----------------")
-					holders = append(holders, h)
+					if len(h.Name) > 0 {
+						holders = append(holders, h)
+					}
 					return true
 				})
 
-				stock.Hodlers = holders
+				stock.Holders = holders
 				return false
 			}
 		}
