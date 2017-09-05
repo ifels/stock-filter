@@ -1,4 +1,4 @@
-package main
+package model
 
 import (
 	"fmt"
@@ -28,10 +28,11 @@ type Stock struct {
 	Subjects     string  `json:"subjects"`
 	SubjectTip   string  `json:"subjectTip"`
 	//BossInfo  string `json:"bossInfo"`
-	Shareholders string `json:"shareholders"`
-	LaunchDate   string `json:"launchDate"`
-	XueqiuHot    int64  `json:"xueqiuHot"`
-	TimeStamp    string `json:"timeStamp"`
+	Shareholders string   `json:"shareholders"`
+	LaunchDate   string   `json:"launchDate"`
+	XueqiuHot    int64    `json:"xueqiuHot"`
+	TimeStamp    string   `json:"timeStamp"`
+	Hodlers      []Holder `json:"hodlers"`
 }
 
 var (
@@ -87,7 +88,7 @@ func (stock *Stock) FillStockInfo() error {
 		stock.TotalValue = getFloat32(arr[45])
 	}
 	err = stock.fillCompanyInfo()
-	stock.fillXueqiuHot()
+	err = stock.fillHolders()
 	return err
 }
 
@@ -233,6 +234,7 @@ func (stock *Stock) fillCompanyInfo2() error {
 
 	return stock.fillCompanyInfo3()
 }
+
 func (stock *Stock) fillCompanyInfo3() error {
 	charset := "gbk"
 	//stockCode = "300340"
@@ -269,23 +271,15 @@ func (stock *Stock) fillCompanyInfo3() error {
 	return err
 }
 
-func (stock *Stock) fillXueqiuHot() error {
-	charset := "utf8"
-	url := ""
-	if strings.HasPrefix(stock.Code, "6") {
-		url = fmt.Sprintf("https://xueqiu.com/S/SH%s", stock.Code)
-	} else {
-		url = fmt.Sprintf("https://xueqiu.com/S/SZ%s", stock.Code)
-	}
-	client := &http.Client{Jar: xueqiuJar}
-	req, _ := http.NewRequest("GET", url+"/follows", nil)
-	req.Header.Set("Referer", url)
-	rsp, err := client.Do(req)
+func (stock *Stock) fillHolders() error {
+	charset := "gbk"
+	//stockCode = "300340"
+	url := fmt.Sprintf("http://basic.10jqka.com.cn/mobile/%s/holdern.html", stock.Code)
+	log.Println(url)
+	rsp, err := http.Get(url)
 	if err != nil {
-		fmt.Println("err: ", err.Error())
 		return err
 	}
-	fmt.Println("rsp: ", rsp)
 	defer rsp.Body.Close()
 
 	if mahonia.GetCharset(charset) == nil {
@@ -299,19 +293,47 @@ func (stock *Stock) fillXueqiuHot() error {
 	if err != nil {
 		return fmt.Errorf("when create from reader error %s ", err.Error())
 	}
-	doc.Find(".stockInfo span").EachWithBreak(func(i int, s *goquery.Selection) bool {
-		// For each item found, get the band and title
-		fmt.Println("hot.txt", s.Text())
-		reg := regexp.MustCompile(`.*的粉丝\((\d+)\)人.*`)
-		if reg.MatchString(s.Text()) {
-			hot := reg.ReplaceAllString(s.Text(), "$1")
-			fmt.Println("hot = ", hot)
-			value, err := strconv.ParseInt(hot, 10, 64)
-			if err == nil {
-				stock.XueqiuHot = value
+
+	holders := []Holder{}
+	doc.Find(".info-cont").EachWithBreak(func(i int, s *goquery.Selection) bool {
+		title := s.Find(".titlebar h3")
+		if title != nil {
+			log.Printf("title = %s", title.Text())
+			if strings.EqualFold("十大流通股东", title.Text()) {
+				tbody := s.Find(".subcont .tabbox .tabcont tbody")
+				if tbody == nil {
+					return true
+				}
+
+				log.Printf("%#v", tbody)
+				tbody.First().Find("tr").EachWithBreak(func(j int, tr *goquery.Selection) bool {
+					h := Holder{}
+					tr.Find("td").EachWithBreak(func(k int, td *goquery.Selection) bool {
+						text := strings.TrimSpace(td.Text())
+						log.Printf("%d. td = %s", k, text)
+						switch k {
+						case 0:
+							h.Name = text
+						case 1:
+							h.Num = text
+						case 2:
+							h.Percent = text
+						case 3:
+							h.Status = text
+						}
+						return true
+					})
+					log.Println("----------------")
+					holders = append(holders, h)
+					return true
+				})
+
+				stock.Hodlers = holders
+				return false
 			}
 		}
-		return false
+		return true
 	})
+	log.Printf("stock= %v", *stock)
 	return err
 }
